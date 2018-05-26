@@ -1,0 +1,14 @@
+*~
+*#
+\#*#
+\#*
+*.o
+*.a
+*.out
+*.editorconfig
+*.gcda
+*.gcno
+test
+units
+example
+.idea
