@@ -13,14 +13,14 @@ void *get_next_alloc_space(void *map, unsigned int size)
 		return (alloc_new_node(map, size));
 	if (tmp->data_size >= size + sizeof(data_t)) {
 		new_node.data_size = tmp->data_size - size - sizeof(data_t);
-		new_node.data = (void *) tmp + size + (sizeof(data_t) * 2);
+		new_node.data = NULL;
 		new_node.next = tmp->next;
 		tmp->data_size = size;
-		tmp->data = (void *) tmp + sizeof(data_t);
 		tmp->next = (void *) tmp + size + sizeof(data_t);
 		memcpy((void *) tmp + size + sizeof(data_t), &new_node,
 		sizeof(data_t));
 	}
+	tmp->data = (void *) tmp + sizeof(data_t);
 	return (tmp->data);
 }
 

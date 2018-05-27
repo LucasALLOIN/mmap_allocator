@@ -18,7 +18,9 @@ void add_to_env_list(void *shmem, tcontainer_t *cont, char *line)
 	test_t *new_node = mmap_alloc(shmem, sizeof(test_t));
 	test_t *last = cont->head;
 
+	memset(new_node, 0, sizeof(test_t));
 	new_node->env = mmap_alloc(shmem, strlen(line) + 1);
+	memset(new_node->env, 0, strlen(line));
 	strcpy(new_node->env, line);
 	new_node->next = NULL;
 	if (cont->head == NULL) {
@@ -38,7 +40,7 @@ void free_list(void *shmem, tcontainer_t *cont)
 	while (current != NULL) {
 		tmp = current->next;
 		free_mmap_alloc(shmem, current->env);
-		free_mmap_alloc(shmem, current);
+		//free_mmap_alloc(shmem, current);
 		current = tmp;
 	}
 	free_mmap_alloc(shmem, cont);
@@ -87,9 +89,11 @@ int main(int argc, char **argv, char **env)
 		sleep(4);
 		printf("Parent recreating env...: \n");
 		cont = mmap_alloc(shmem, sizeof(tcontainer_t));
+		memset(cont, 0, sizeof(tcontainer_t));
 		for (int i = 0; env[i] != NULL; i++) {
 			add_to_env_list(shmem, cont, env[i]);
 		}
 		sleep(6);
+		dump_mmap_mem_info(shmem);
 	}
 }
