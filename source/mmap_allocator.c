@@ -4,21 +4,58 @@
 #include <stdlib.h>
 #include "mmap_allocator.h"
 
+void *get_next_alloc_space(void *map, unsigned int size)
+{
+	data_t *tmp;
+	data_t new_node;
+
+	if ((tmp = find_free_node(((mem_t *) map)->data, size)) == NULL)
+		return (alloc_new_node(map, size));
+	if (tmp->data_size >= size + sizeof(data_t)) {
+		new_node.data_size = tmp->data_size - size - sizeof(data_t);
+		new_node.data = (void *) tmp + size + (sizeof(data_t) * 2);
+		new_node.next = tmp->next;
+		tmp->data_size = size;
+		tmp->data = (void *) tmp + sizeof(data_t);
+		tmp->next = (void *) tmp + size + sizeof(data_t);
+		memcpy((void *) tmp + size + sizeof(data_t), &new_node,
+		sizeof(data_t));
+	}
+	return (tmp->data);
+}
+
 void *mmap_alloc(void *map, unsigned int size)
 {
 	mem_t *mem = (mem_t *) map;
 	data_t *tmp = mem->data;
-	data_t new_node;
 
-	//printf("New alloc of size %d\nActual size %d\nSpace free %d\n", size, mem->actual_mem_used, mem->mem_size - mem->actual_mem_used);
-	while (tmp->next != NULL)
-		tmp = tmp->next;
-	tmp->next = map + mem->actual_mem_used;
-	new_node.data = map + mem->actual_mem_used + sizeof(data_t);
-	new_node.next = NULL;
-	memcpy(map + mem->actual_mem_used, &new_node, sizeof(data_t));
-	mem->actual_mem_used += size + sizeof(data_t);
-	return (new_node.data);
+	(void) tmp;
+	if (tmp == NULL)
+		return (alloc_mmap_start(mem, size));
+	return (get_next_alloc_space(map, size));
+}
+
+unsigned int get_new_mmap_size(data_t *data)
+{
+	unsigned int size = data->data_size;
+
+	data = data->next;
+	while (data != NULL && data->data == NULL) {
+		size += sizeof(data_t) + data->data_size;
+		data = data->next;
+	}
+	return (size);
+}
+
+void *get_new_next_ptr(data_t *data)
+{
+	data = data->next;
+	while (data != NULL) {
+		if (data->data != NULL)
+			return (data);
+		data = data->next;
+	}
+	return (NULL);
 }
 
 void *create_shared_memory(unsigned int size)
@@ -27,19 +64,10 @@ void *create_shared_memory(unsigned int size)
 	int visibility = MAP_ANONYMOUS | MAP_SHARED;
 	void *shmem = mmap(NULL, size, protection, visibility, -1, 0);
 	mem_t mem;
-	data_t fnode;
 
-	mem.data = shmem + sizeof(mem_t);
+	mem.data = NULL;
 	mem.mem_size = size;
-	mem.actual_mem_used = sizeof(mem_t) + sizeof(data_t);
-	fnode.data = NULL;
-	fnode.next = NULL;
+	mem.actual_mem_used = sizeof(mem_t);
 	memcpy(shmem, &mem, sizeof(mem_t));
-	memcpy(shmem + sizeof(mem_t), &fnode, sizeof(data_t));
 	return (shmem);
-}
-
-void dump_mmap_mem(void *map)
-{
-	write(1, map, ((mem_t *) map)->actual_mem_used);
 }
