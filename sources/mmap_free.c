@@ -15,8 +15,7 @@ void *refill_mmap(data_t *data, unsigned int size)
 		new_node.next = data->next;
 		memcpy((void *) data + (unsigned int) sizeof(data_t) + size,
 		       &new_node,
-		       sizeof
-		       (data_t));
+		       sizeof(data_t));
 		data->next = (void *) data + (unsigned int) sizeof(data_t) +
 			     size;
 		data->data_size = size;

@@ -29,7 +29,6 @@ void *mmap_alloc(void *map, unsigned int size)
 	mem_t *mem = (mem_t *) map;
 	data_t *tmp = mem->data;
 
-	(void) tmp;
 	if (tmp == NULL)
 		return (alloc_mmap_start(mem, size));
 	return (get_next_alloc_space(map, size));
