@@ -7,5 +7,8 @@ All variable can be free by using free_mmap_alloc.
 
 Example are provided in example.c
 
-make to build example binary
-make lib to build .a lib
+make example: build example binary
+make: build .a lib
+
+By Lucas Alloin https://github.com/LucasALLOIN
+Thanks to Alexandre Fourcat https://github.com/Afourcat for the Makefile
