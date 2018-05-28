@@ -1,41 +1,98 @@
-SRCLIB  =	source/mmap_allocator.c	\
-			source/mmap_utils.c \
-			source/mmap_init.c \
-			source/mmap_free.c
+##
+## EPITECH PROJECT, 2017
+## Makefile
+## File description:
+## makefile of the source file
+##
 
-SRCEX	=	source/mmap_allocator.c \
-			source/mmap_utils.c \
-			source/mmap_init.c \
-			source/mmap_free.c \
-			example.c
+ROOT	=	.
 
-OBJLIB	=	$(SRCLIB:.c=.o)
-
-OBJEX	=	$(SRCEX:.c=.o)
-
-CFLAGS	=	-Werror -Wextra -W -Wall -Wparentheses -Wsign-compare -Wpointer-sign -Wuninitialized -Wunused-but-set-variable -fno-builtin -I ./include/ -g
-
-NAMELIB	=	mmap_allocator.a
-
-NAMEEX 	=	example
+SRC_DIR	=	sources
 
 CC	=	gcc
 
-all:	$(NAMEEX)
+NAME	=	example
 
-$(NAMEEX):	$(OBJEX)
-		$(CC) -o $(NAMEEX) $(OBJEX) $(CFLAGS)
+REAL	=	$(ROOT)/build
 
-lib:	$(OBJLIB)
-	ar rc $(NAMELIB) $(OBJLIB)
+LIB	=	liballocator.a
+
+SRC	=	$(SRC_DIR)/mmap_allocator.c \
+		$(SRC_DIR)/mmap_utils.c \
+		$(SRC_DIR)/mmap_init.c \
+		$(SRC_DIR)/mmap_free.c
+
+SRC_BIN	=	$(SRC_DIR)/example.c
+
+WARN	=	-W -Wall -Wextra
+
+CFLAGS	=	-I $(ROOT)/includes $(WARN)
+
+LDFLAGS	=	
+
+LIB	?=	1
+
+TEST	?=	0
+
+DEB	?=      0
+
+G	=	-g
+
+V	?=	@
+
+OBJS	=	$(patsubst $(SRC_DIR)/%.c, $(REAL)/%.o, $(SRC))
+
+#COLOR
+
+GREEN	=		\e[1;32m
+
+WHITE	=		\e[1;3\e[0m
+
+ORANGE	=		\e[1;3\e[1;33m
+
+RED	=		\e[1;3\e[1;35m
+
+BLUE	=		\e[1;3\e[1;34m
+
+debug:			CFLAGS	+= $(G)
+
+all:			$(LIB)
+
+$(LIB):			$(OBJS)
+			$(V)printf "$(GREEN)Compile sources.$(WHITE)\n"
+			$(V)ar rc -o $(LIB) $(OBJS)
+			$(V)printf "$(GREEN)Linking obj and Libraries.$(WHITE)\n"
+
+$(NAME):		$(LIB)
+			$(V)$(CC) -o $(REAL)/example.o -c $(SRC_DIR)/example.c $(CFLAGS)
+			$(V)$(CC) -o $@ $(OBJS) $(REAL)/example.o $(CFLAGS) -L . -l allocator
+			$(V)printf "$(GREEN)Dup $(NAME) into root directory.$(WHITE)\n"
+
+debug:			fclean echo_d $(NAME)
+
+$(REAL)/%.o:		$(SRC_DIR)/%.c
+			$(V)mkdir -p $(dir $@)
+			$(V)printf "$(BLUE)Compiling [$(GREEN)$(notdir $<)$(BLUE) -> $(RED)$(notdir $@)$(BLUE)]\n$(WHITE)"
+			$(V)$(CC) -o $@ -c $< $(CFLAGS) $(LDFLAGS)
 
 clean:
-	rm -f $(OBJEX) $(OBJLIB)
+			$(V)rm -rf $(OBJS)
+			$(V)rm -rf $(REAL)/example.o
+			$(V)printf "$(ORANGE)Removing object files.$(WHITE)\n"
 
-fclean: clean
-	rm -f $(NAMEEX) $(NAMELIB)
+fclean:			clean
+			$(V)rm -f $(LIB)
+			$(V)rm -f $(REAL)/$(NAME)
+			$(V)rm -f $(ROOT)/$(NAME)
+			$(V)printf "$(ORANGE)Removing binary file.$(WHITE)\n"
 
-docker:
-        sudo docker run -it -v `pwd`:/home/epitest -w /home/epitest epitechcontent/epitest-docker /bin/bash
+re:			fclean
+			$(V)make --no-print-directory all
 
-re: fclean all
+echo_build:
+			$(V)printf "$(GREEN)Begin of the build !\n$(ORANGE)Warnings : \n$(WHITE)"
+
+echo_d:
+			$(V)printf "$(RED)DEBUG MODE initialized.$(WHITE)\n";
+
+.PHONY: clean fclean debug all re echo_debug buildrepo
