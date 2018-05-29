@@ -39,11 +39,11 @@ void free_list(void *shmem, tcontainer_t *cont)
 
 	while (current != NULL) {
 		tmp = current->next;
-		free_mmap_alloc(shmem, current->env);
+		mmap_free(shmem, current->env);
 		//free_mmap_alloc(shmem, current);
 		current = tmp;
 	}
-	free_mmap_alloc(shmem, cont);
+	mmap_free(shmem, cont);
 	cont = NULL;
 }
 

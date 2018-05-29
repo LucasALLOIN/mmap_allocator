@@ -1,10 +1,3 @@
-##
-## EPITECH PROJECT, 2017
-## Makefile
-## File description:
-## makefile of the source file
-##
-
 ROOT	=	.
 
 SRC_DIR	=	sources
@@ -19,6 +12,7 @@ LIB	=	liballocator.a
 
 SRC	=	$(SRC_DIR)/mmap_allocator.c \
 		$(SRC_DIR)/mmap_utils.c \
+		$(SRC_DIR)/mmap_calloc.c \
 		$(SRC_DIR)/mmap_init.c \
 		$(SRC_DIR)/mmap_free.c
 

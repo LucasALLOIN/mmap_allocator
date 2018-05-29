@@ -28,10 +28,11 @@ unsigned int get_mmap_total_size(void *map);
 data_t *get_last_node(void *map);
 
 //User func
-void *mmap_alloc(void *map, unsigned int size);
 void *create_shared_memory(unsigned int size);
+void *mmap_alloc(void *map, unsigned int size);
+void *mmap_calloc(void *map, unsigned int size);
+void mmap_free(void *map, void *ptr);
 void dump_mmap_mem(void *map);
 void dump_mmap_mem_info(void *map);
-void free_mmap_alloc(void *map, void *ptr);
 
 #endif

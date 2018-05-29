@@ -37,7 +37,7 @@ void remap_mmap_free(void *map)
 	}
 }
 
-void free_mmap_alloc(void *map, void *ptr)
+void mmap_free(void *map, void *ptr)
 {
 	data_t *data = get_mmap_data_from_ptr(map, ptr);
 
