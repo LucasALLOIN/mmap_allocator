@@ -39,12 +39,18 @@ void remap_mmap_free(void *map)
 
 void mmap_free(void *map, void *ptr)
 {
-	data_t *data = get_mmap_data_from_ptr(map, ptr);
+	mem_t *mem = (mem_t *) map;
+	data_t *data;
 
+	while (mem != NULL) {
+		if ((data = get_mmap_data_from_ptr((void *) mem, ptr)) != NULL)
+			break;
+		mem = mem->next;
+	}
 	if (data == NULL)
 		return;
 	data->data = NULL;
-	remap_mmap_free(map);
+	remap_mmap_free((void *) mem);
 }
 
 void *get_mmap_data_from_ptr(void *map, void *ptr)

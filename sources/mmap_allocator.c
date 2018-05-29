@@ -24,14 +24,41 @@ void *get_next_alloc_space(void *map, unsigned int size)
 	return (tmp->data);
 }
 
-void *mmap_alloc(void *map, unsigned int size)
+void *get_allocable_page(void *map, unsigned int page_size, unsigned int size)
 {
 	mem_t *mem = (mem_t *) map;
-	data_t *tmp = mem->data;
+	mem_t *tmp = mem;
+	data_t *node = NULL;
 
+	while (tmp != NULL) {
+		if (tmp->data == NULL || (node = find_free_node(tmp->data,
+		size))	!= NULL)
+			return (tmp);
+		else if ((void * ) tmp + get_mmap_total_size(tmp) + sizeof
+		(data_t) + size <= tmp->end_ptr)
+			return (tmp);
+		mem = tmp;
+		tmp = tmp->next;
+	}
+	tmp = create_shared_memory((page_size >= sizeof(mem_t) + sizeof
+	(data_t) + size) ? page_size : sizeof(mem_t) + sizeof(data_t) + size);
+	mem->next = (void *) tmp;
+	return (tmp);
+}
+
+void *mmap_alloc(void *map, unsigned int size)
+{
+	void *mem;
+	data_t *tmp;
+	unsigned int page_size = (unsigned int) getpagesize();
+
+	mem = get_allocable_page(map, page_size, size);
+	tmp = ((mem_t *) mem)->data;
+	if (mem == NULL)
+		return (NULL);
 	if (tmp == NULL)
 		return (alloc_mmap_start(mem, size));
-	return (get_next_alloc_space(map, size));
+	return (get_next_alloc_space(mem, size));
 }
 
 unsigned int get_new_mmap_size(data_t *data)
@@ -65,8 +92,8 @@ void *create_shared_memory(unsigned int size)
 	mem_t mem;
 
 	mem.data = NULL;
-	mem.mem_size = size;
-	mem.actual_mem_used = sizeof(mem_t);
+	mem.end_ptr = shmem + size;
+	mem.next = NULL;
 	memcpy(shmem, &mem, sizeof(mem_t));
 	return (shmem);
 }

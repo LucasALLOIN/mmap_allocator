@@ -20,7 +20,7 @@ SRC_BIN	=	$(SRC_DIR)/example.c
 
 WARN	=	-W -Wall -Wextra
 
-CFLAGS	=	-I $(ROOT)/includes $(WARN)
+CFLAGS	=	-I $(ROOT)/includes $(WARN) -g
 
 LDFLAGS	=	
 

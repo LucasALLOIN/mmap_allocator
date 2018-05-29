@@ -6,20 +6,23 @@
 
 void dump_mmap_mem(void *map)
 {
-	write(1, map, ((mem_t *) map)->actual_mem_used);
+	(void) map;
+	//write(1, map, ((mem_t *) map)->actual_mem_used);
 }
 
 void dump_mmap_mem_info(void *map)
 {
 	mem_t *mem = (mem_t *) map;
-	data_t *tmp = mem->data;
+	data_t *tmp;
 
-	printf("MemSize: %d\nMemUsed: %d\nDataprt: %p\n", mem->mem_size,
-	       mem->actual_mem_used, mem->data);
-	while (tmp != NULL) {
-		printf("node %p, size %d, data %p, next %p\n", tmp,
-		       tmp->data_size, tmp->data, tmp->next);
-		tmp = tmp->next;
+	while (mem != NULL) {
+		tmp = mem->data;
+		while (tmp != NULL) {
+			printf("page %p, node %p, size %d, data %p, next %p\n",
+			mem, tmp, tmp->data_size, tmp->data, mem->next);
+			tmp = tmp->next;
+		}
+		mem = mem->next;
 	}
 }
 

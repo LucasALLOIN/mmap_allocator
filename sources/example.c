@@ -40,7 +40,7 @@ void free_list(void *shmem, tcontainer_t *cont)
 	while (current != NULL) {
 		tmp = current->next;
 		mmap_free(shmem, current->env);
-		//free_mmap_alloc(shmem, current);
+		mmap_free(shmem, current);
 		current = tmp;
 	}
 	mmap_free(shmem, cont);
@@ -49,7 +49,7 @@ void free_list(void *shmem, tcontainer_t *cont)
 
 int main(int argc, char **argv, char **env)
 {
-	void *shmem = create_shared_memory(20000);
+	void *shmem = create_shared_memory(4096);
 	tcontainer_t *cont = mmap_alloc(shmem, sizeof(tcontainer_t));
 	test_t *tmp;
 	int pid;
@@ -62,13 +62,14 @@ int main(int argc, char **argv, char **env)
 	(void) cont;
 	cont->head = NULL;
 	cont->head = NULL;
+	for (int i = 0; env[i] != NULL; i++) {
+		add_to_env_list(shmem, cont, env[i]);
+	}
 	pid = fork();
 	if (pid == 0) {
 		printf("Child is creating env...\n");
-		for (int i = 0; env[i] != NULL; i++) {
-			add_to_env_list(shmem, cont, env[i]);
-		}
-		sleep(3);
+
+		sleep(4);
 		printf("Child free env...\n");
 		free_list(shmem, cont);
 		sleep(5);
@@ -80,20 +81,20 @@ int main(int argc, char **argv, char **env)
 		printf("Parent read of env: \n");
 		for (tmp = cont->head; tmp != NULL; tmp = tmp->next)
 			printf("%s\n", tmp->env);
-		sleep(2);
+		sleep(3);
 		printf("Parent read of env after 2s: \n");
 		//free_mmap_alloc(shmem, cont);
 		for (tmp = cont->head; tmp != NULL; tmp = tmp->next) {
 			printf("%s\n", tmp->env);
 		}
-		sleep(4);
+		sleep(5);
 		printf("Parent recreating env...: \n");
 		cont = mmap_alloc(shmem, sizeof(tcontainer_t));
 		memset(cont, 0, sizeof(tcontainer_t));
 		for (int i = 0; env[i] != NULL; i++) {
 			add_to_env_list(shmem, cont, env[i]);
 		}
-		sleep(6);
+		sleep(7);
 		dump_mmap_mem_info(shmem);
 	}
 }

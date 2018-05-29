@@ -11,8 +11,8 @@ typedef struct data_s {
 
 typedef struct mem_s {
         struct data_s *data;
-        unsigned int mem_size;
-        unsigned int actual_mem_used;
+        void *end_ptr;
+        struct mem_s *next;
 } mem_t;
 
 //Allocation system func
